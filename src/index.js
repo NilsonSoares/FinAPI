@@ -49,11 +49,12 @@ app.post("/account", (request, response) => {
 app.get("/statement/:cpf", (request, response) => {
 
     // Pega o route param cpf
-    const { cpf } = request.params;
+    const { cpf } = request.headers;
 
     //Pega o objeto associado ao cpf passado como parâmetro
     const customer = customers.find(customer => customer.cpf === cpf);
 
+    // Verifica se o cliente existe
     if(!customer) {
         return response.status(400).json({error: "Customer not found!"});
     }
