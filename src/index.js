@@ -16,6 +16,25 @@ app.use(express.json());
 // Array de clientes
 const customers = [];
 
+// Middleware de verificação de conta
+function verifyIfExistsAccountCPF(request, response, next) {
+    // Pega o route param cpf
+    const { cpf } = request.headers;
+
+    //Pega o objeto associado ao cpf passado como parâmetro
+    const customer = customers.find(customer => customer.cpf === cpf);
+
+    // Verifica se o cliente existe
+    if(!customer) {
+        return response.status(400).json({error: "Customer not found!"});
+    }
+
+    // Passa o objeto customer para as rotas que utilizarão o middleware
+    request.customer = customer;
+
+    // Vai para o próximo passo (próxima rota)
+    return next();
+}
 /**
  * Account Model: 
  * cpf - string
@@ -45,19 +64,17 @@ app.post("/account", (request, response) => {
     // Retorna o status de sucesso
     return response.status(201).send();
 });
+/**
+ * Uma forma de utilizar midlewares é através do app.use(<middelware>)
+ * nesse caso o middelware é aplicado a todas as rotas subsequentes
+ */
+//app.use(verifyIfExistsAccountCPF);
 
-app.get("/statement/:cpf", (request, response) => {
+// Passa o middleware para uam rota específica
+app.get("/statement/", verifyIfExistsAccountCPF, (request, response) => {
 
-    // Pega o route param cpf
-    const { cpf } = request.headers;
-
-    //Pega o objeto associado ao cpf passado como parâmetro
-    const customer = customers.find(customer => customer.cpf === cpf);
-
-    // Verifica se o cliente existe
-    if(!customer) {
-        return response.status(400).json({error: "Customer not found!"});
-    }
+    // Recupera o customer passado através do middleware
+    const { customer } = request;
 
     // Retorna o array de statement do objeto encontrado
     return response.json(customer.statement);
