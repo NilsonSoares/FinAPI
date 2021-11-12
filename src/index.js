@@ -80,5 +80,30 @@ app.get("/statement/", verifyIfExistsAccountCPF, (request, response) => {
     return response.json(customer.statement);
 })
 
+
+// Rota para depósito passando pelo middleware que verifica se a conta existe
+app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
+
+    // Recupera os dados do depósito passados por body params
+    const { description, amount } = request.body;
+
+    // Recupera o cliente passado pelo middleware
+    const { customer } = request;
+
+    // Cria um objeto para representar a operação de depósito
+    const statementOperation = {
+        description,
+        amount,
+        createdAt: new Date(),
+        type: "credit"
+    }
+    
+    // Adiciona a opeeração no array de operações do usuário
+    customer.statement.push(statementOperation);
+
+    // Retorna o status de sucesso na inserção do depósito
+    return response.status(201).send();
+})
+
 // O servidor ouvirá as requisições na porta especificada
 app.listen(3333);
