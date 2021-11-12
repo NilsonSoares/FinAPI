@@ -35,6 +35,23 @@ function verifyIfExistsAccountCPF(request, response, next) {
     // Vai para o próximo passo (próxima rota)
     return next();
 }
+
+// Função para cálculo do saldo baseado na lista de operações
+function getBalance(statement) {
+    // O método reduce() retorna o valor do saldo
+    const balance = statement.reduce((acc, operation) => {
+        if(operation.type === "credit"){
+             // Soma ao acumulador acc o valor da operação caso seja de crédito
+            return acc + operation.amount;
+        }else {
+            // Subtrai do acumulador acc o valor da operação caso seja de débito
+            return acc - operation.amount;
+        }
+    }, 0);// O acumulador começão com o valor 0
+
+    // Retorna o valor do saldo
+    return balance;
+}
 /**
  * Account Model: 
  * cpf - string
@@ -103,6 +120,39 @@ app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
 
     // Retorna o status de sucesso na inserção do depósito
     return response.status(201).send();
+})
+
+// Rota para saque passando pelo middleware que verifica se a conta existe
+app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
+    
+    // Recupera o valor do saque passado por body param
+    const { amount } = request.body;
+
+    // Recupera o cliente passado pelo middleware
+    const { customer } = request;
+
+    // Calcula o saldo em conta
+    const balance = getBalance(customer.statement);
+
+    // Verifica se o saldo é insuficiente
+    if(balance < amount) {
+        // Retorna um erro caso o valor em conta seja menor que o valor do saque
+        return response.status(400).json({error: "Insuficient funds!"});
+    }
+
+    // Caso o saldo seja suficiente, cria um objeto para representar a operação de saque
+    const statementOperation = {
+        amount,
+        createdAt: new Date(),
+        type: "debit"
+    }
+
+    // Adiciona o saque à lista de operações do cliente
+    customer.statement.push(statementOperation);
+
+    // Retorna o status de sucesso na inserção do saque
+    return response.status(201).send();
+
 })
 
 // O servidor ouvirá as requisições na porta especificada
