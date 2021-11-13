@@ -216,5 +216,18 @@ app.delete("/account", verifyIfExistsAccountCPF, (request, response) => {
     return response.status(200).json(customers);
 })
 
+// Rota para consulta do saldo
+app.get("/balance", verifyIfExistsAccountCPF, (request, response) => {
+
+    // Recupera o cliente passado pelo middleware
+    const { customer } = request;
+
+    // Obtém o valor do saldo a partir das operações do cliente
+    const balance = getBalance(customer.statement);
+
+    // Retorna o valor o saldo
+    return response.json(balance);
+})
+
 // O servidor ouvirá as requisições na porta especificada
 app.listen(3333);
