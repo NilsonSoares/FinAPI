@@ -97,6 +97,25 @@ app.get("/statement/", verifyIfExistsAccountCPF, (request, response) => {
     return response.json(customer.statement);
 })
 
+// Rota para consulta de extrato filtrando pela data
+app.get("/statement/date", verifyIfExistsAccountCPF, (request, response) => {
+
+    // Recupera da data passada através dos query params
+    const { date } = request.query;
+
+    // Recupera o cliente passado através do middleware
+    const { customer } = request;
+
+    // Cria um objeto Data com a data informada
+    const dateFormat = new Date(date);
+
+    // Filtra todas as operações realizadas na data especificada
+    const statement = customer.statement.filter((statement) => statement.createdAt.toDateString() === new Date(dateFormat).toDateString());
+
+    // Retorna um array com as operações
+    return response.json(statement);
+})
+
 
 // Rota para depósito passando pelo middleware que verifica se a conta existe
 app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
