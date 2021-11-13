@@ -1,5 +1,4 @@
 // Faz a importação do express
-const { request } = require("express");
 const express = require("express");
 
 /**
@@ -199,6 +198,22 @@ app.get("/account", verifyIfExistsAccountCPF, (request, response) => {
 
     // Retorna os dados do cliente
     return response.json(customer);
+})
+
+// Rota para apagar uma conta
+app.delete("/account", verifyIfExistsAccountCPF, (request, response) => {
+
+    // Recupera o cliente passado pelo middleware
+    const { customer } = request;
+
+    /* 
+    * Encontra a posição do cliente no array e
+    * remove 1 elemento (próprio cliente)
+    */
+    customers.splice(customer, 1);
+
+    // Retorna o status de sucesso e a lista com os clientes restantes
+    return response.status(200).json(customers);
 })
 
 // O servidor ouvirá as requisições na porta especificada
