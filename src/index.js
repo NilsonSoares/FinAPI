@@ -206,11 +206,17 @@ app.delete("/account", verifyIfExistsAccountCPF, (request, response) => {
     // Recupera o cliente passado pelo middleware
     const { customer } = request;
 
+    const balance = getBalance(customer.statement);
+
+    if(balance !== 0){
+        return response.status(400).json({error: "The accouns's founds is not zero!"});
+    }
+
     /* 
     * Encontra a posição do cliente no array e
     * remove 1 elemento (próprio cliente)
     */
-    customers.splice(customer, 1);
+    customers.splice(customers.indexOf(customer), 1);
 
     // Retorna o status de sucesso e a lista com os clientes restantes
     return response.status(200).json(customers);
