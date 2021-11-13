@@ -1,4 +1,5 @@
 // Faz a importação do express
+const { request } = require("express");
 const express = require("express");
 
 /**
@@ -172,6 +173,32 @@ app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
     // Retorna o status de sucesso na inserção do saque
     return response.status(201).send();
 
+})
+
+// Rota para atualização do cliente passando pelo middleware que verifica se aconta existe
+app.put("/account", verifyIfExistsAccountCPF, (request, response) => {
+
+    // Recupera o nome passado pelo body param
+    const { name } = request.body;
+
+    // Recupera o cliente passado pelo middleware
+    const { customer } = request;
+
+    // Atualiza o nome do cliente
+    customer.name = name;
+
+    // Retorna o status de sucesso na atualização do cliente
+    return response.status(201).send();
+})
+
+// Rota para recuperar os dados da conta do cliente
+app.get("/account", verifyIfExistsAccountCPF, (request, response) => {
+
+    // Recupera o cliente passado pelo middleware
+    const { customer } = request;
+
+    // Retorna os dados do cliente
+    return response.json(customer);
 })
 
 // O servidor ouvirá as requisições na porta especificada
